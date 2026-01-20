@@ -30,6 +30,10 @@ inputs:
     description: The file to use for the Markdown-format email body
     type: string
     default: ./email_body.txt
+  github_token:
+    description: The GitHub token used to create an authenticated client
+    type: string
+    required: true
 
 runs:
   using: composite
@@ -40,6 +44,7 @@ runs:
       uses: thoukydides/action-downstream-forks@v1
       with:
         sub_forks: ${{ inputs.sub_forks }}
+        github_token: ${{ inputs.github_token }}
 
     - name: Check date of the last workflow run
       if: steps.forks.outputs.updated_at != ''
@@ -49,6 +54,7 @@ runs:
         repo_variable: ACTION_NOTIFY_DOWNSTREAM_FORKS
         set_date: ${{ steps.forks.outputs.updated_at }}
         check_date: ${{ steps.forks.outputs.updated_at }}
+        github_token: ${{ inputs.github_token }}
 
     - name: No downstream forks ahead warning
       if: steps.forks.outputs.updated_at == ''

@@ -10,8 +10,14 @@ The date of the last seen downstream commit is stored in the `ACTION_NOTIFY_DOWN
 ## Prerequisites
 
 Before using this workflow, ensure:
-- The workflow has `contents: read` and `actions: write` permissions (either via the default `GITHUB_TOKEN` or a fine-grained token).
-- The required email configuration has been placed in repository or organisation secrets.
+- A fine-grained Personal Access Token (PAT) has been created with the following permissions:
+  - Contents: Read-only
+  - Metadata: Read-only
+  - Variables: Read and write
+- Repository secrets have been created for:
+  - The PAT (e.g. `PAT_NOTIFY_FORKS`)
+  - The SMTP email server and credentials (e.g. `EMAIL_SMTP_URL`) in either `smtp://user:password@server:port` or `smtp+starttls://user:password@server:port` format
+  - The recipient email addresses (e.g. `EMAIL_TO`)
 
 ## Inputs
 
@@ -25,6 +31,7 @@ Various inputs are defined in the action to configure its operation:
 | `email_from` | The sender's name (email address is optional) | `"GitHub Actions"`
 | `email_subject` | The subject line for the notification email | `"GitHub Downstream Forks Ahead (${{ github.repository }})"`
 | `email_body_file` | The file to use for the Markdown-format email body | `./email_body.txt`
+| `github_token` | The GitHub token used to create an authenticated client | *required*
 
 > [!CAUTION]
 > Use repository or organisation secrets for `email_smtp_url` and `email_to`.
@@ -35,9 +42,7 @@ Create a workflow that performs a daily check for new commits to downstream fork
 
 ```yaml
 name: Downstream Fork Notification
-permissions:
-  contents: read
-  actions: write
+permissions: {}
 
 on:
   workflow_dispatch:
@@ -56,6 +61,7 @@ jobs:
       with:
         email_smtp_url: ${{ secrets.EMAIL_SMTP_URL }}
         email_to: ${{ secrets.EMAIL_TO }}
+        github_token: ${{ secrets.PAT_NOTIFY_FORKS }}
 ```
 
 ## ISC License (ISC)
