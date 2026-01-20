@@ -10,7 +10,7 @@ The date of the last seen downstream commit is stored in the `ACTION_NOTIFY_DOWN
 ## Prerequisites
 
 Before using this workflow, ensure:
-- The workflow has `contents: read`, `metadata: read`, and `variables: write` permissions (either via the default `GITHUB_TOKEN` or a fine-grained token).
+- The workflow has `contents: read` and `actions: write` permissions (either via the default `GITHUB_TOKEN` or a fine-grained token).
 - The required email configuration has been placed in repository or organisation secrets.
 
 ## Inputs
@@ -37,8 +37,7 @@ Create a workflow that performs a daily check for new commits to downstream fork
 name: Downstream Fork Notification
 permissions:
   contents: read
-  metadata: read
-  variables: write
+  actions: write
 
 on:
   workflow_dispatch:
