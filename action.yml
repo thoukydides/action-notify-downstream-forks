@@ -1,0 +1,83 @@
+name: Downstream Fork Notification
+author: Alexander Thoukydides
+description: Send an email notification when a downstream fork has new commits
+branding:
+  icon: 'mail'
+  color: 'red'
+
+inputs:
+  sub_forks:
+    description: Whether to include forks of forks when checking for downstream commits ahead
+    type: boolean
+    default: true
+  email_smtp_url:
+    description: "The email connection URL: smtp://user:password@server:port or smtp+starttls://user:password@server:port"
+    type: string
+    required: true
+  email_to:
+    description: The recipient email addresses, comma-separated
+    type: string
+    required: true
+  email_from:
+    description: The sender's name (email address is optional)
+    type: string
+    default: GitHub Actions
+  email_subject:
+    description: The subject line for the notification email
+    type: string
+    default: GitHub Downstream Forks Ahead
+  email_body_file:
+    description: The file to use for the Markdown-format email body
+    type: string
+    default: ./email_body.txt
+
+runs:
+  using: composite
+
+  steps:
+    - name: Identify downstream forks
+      id: forks
+      uses: thoukydides/action-downstream-forks@v1
+      with:
+        sub_forks: ${{ inputs.sub_forks }}
+
+    - name: Check date of the last workflow run
+      if: steps.forks.outputs.updated_at != ''
+      id: last
+      uses: thoukydides/action-last-run-check@v1
+      with:
+        repo_variable: ACTION_NOTIFY_DOWNSTREAM_FORKS
+        set_date: ${{ steps.forks.outputs.updated_at }}
+        check_date: ${{ steps.forks.outputs.updated_at }}
+
+    - name: No downstream forks ahead warning
+      if: steps.forks.outputs.updated_at == ''
+      shell: bash
+      run: | # shell
+        echo "::warning::No downstream forks found with commits ahead of the base repository"
+
+    - name: Add markdown output to workflow summary and email body file
+      if: steps.forks.outputs.updated_at != ''
+      env:
+        MARKDOWN: |
+          # Downstream Forks with New Commits Ahead
+
+          ${{ steps.forks.outputs.markdown }}
+
+          (New commits since ${{ steps.last.outputs.last_run_date }})
+      shell: bash
+      run: | # shell
+        mkdir -p "$(dirname "${{ inputs.email_body_file }}")"
+        printf '%s' "$MARKDOWN" > "${{ inputs.email_body_file }}"
+        printf '%s' "$MARKDOWN" >> "$GITHUB_STEP_SUMMARY"
+
+    - name: Send email if there are new commits in downstream forks
+      if: steps.forks.outputs.updated_at != '' && steps.last.outputs.is_after_last_run == 'true'
+      uses: dawidd6/action-send-mail@v7
+      with:
+        connection_url: ${{ inputs.email_smtp_url }}
+        subject: ${{ inputs.email_subject }}
+        to: ${{ inputs.email_to }}
+        from: ${{ inputs.email_from }}
+        html_body: ${{ inputs.email_body_file }}
+        convert_markdown: true
