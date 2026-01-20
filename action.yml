@@ -79,5 +79,5 @@ runs:
         subject: ${{ inputs.email_subject }}
         to: ${{ inputs.email_to }}
         from: ${{ inputs.email_from }}
-        html_body: ${{ inputs.email_body_file }}
+        html_body: file://${{ inputs.email_body_file }}
         convert_markdown: true
