@@ -25,7 +25,7 @@ inputs:
   email_subject:
     description: The subject line for the notification email
     type: string
-    default: GitHub Downstream Forks Ahead
+    default: GitHub Downstream Forks Ahead (${{ github.repository }})
   email_body_file:
     description: The file to use for the Markdown-format email body
     type: string
