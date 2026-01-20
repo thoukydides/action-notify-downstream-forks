@@ -29,7 +29,7 @@ Various inputs are defined in the action to configure its operation:
 | `email_smtp_url` | The email connection URL: `smtp://user:password@server:port` or `smtp+starttls://user:password@server:port` | *required*
 | `email_to` | The recipient email addresses, comma-separated | *required*
 | `email_from` | The sender's name (email address is optional) | `"GitHub Actions"`
-| `email_subject` | The subject line for the notification email | `"GitHub Downstream Forks Ahead (${{ github.repository }})"`
+| `email_subject` | The subject line for the notification email | `"Downstream Forks (${{ github.repository }})"`
 | `email_body_file` | The file to use for the Markdown-format email body | `./email_body.txt`
 | `github_token` | The GitHub token used to create an authenticated client | *required*
 
